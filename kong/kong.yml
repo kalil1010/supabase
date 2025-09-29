@@ -203,7 +203,7 @@ services:
               - "Authorization:Bearer ${SUPABASE_SERVICE_KEY}"
               - "apikey:${SUPABASE_SERVICE_KEY}"
           replace:
-            uri: "/storage/v1/bucket"
+            uri: "/storage/v1/buckets"
 
   ## Analytics routes
   - name: analytics-v1
