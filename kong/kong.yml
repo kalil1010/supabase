@@ -8,10 +8,10 @@ consumers:
   - username: DASHBOARD
   - username: anon
     keyauth_credentials:
-      - key: $SUPABASE_ANON_KEY
+      - key: ${SUPABASE_ANON_KEY}
   - username: service_role
     keyauth_credentials:
-      - key: $SUPABASE_SERVICE_KEY
+      - key: ${SUPABASE_SERVICE_KEY}
 
 ###
 ### Access Control List
@@ -27,8 +27,8 @@ acls:
 ###
 basicauth_credentials:
   - consumer: DASHBOARD
-    username: $DASHBOARD_USERNAME
-    password: $DASHBOARD_PASSWORD
+    username: ${DASHBOARD_USERNAME}
+    password: ${DASHBOARD_PASSWORD}
 
 ###
 ### API Routes
@@ -178,8 +178,8 @@ services:
 
   ## Storage API passthrough
   - name: storage-v1
-    host: bucket.railway.internal
-    port: 9000
+    host: ${STORAGE_API_HOST}
+    port: ${MINIO_PRIVATE_PORT}
     protocol: http
     routes:
       - name: storage-v1-all
@@ -191,12 +191,12 @@ services:
 
   ## Studio helper (injects service key for buckets)
   - name: platform-storage-buckets
-    host: bucket.railway.internal
-    port: 9000
+    host: ${STORAGE_API_HOST}
+    port: ${MINIO_PRIVATE_PORT}
     protocol: http
     routes:
       - name: platform-storage-buckets-route
-        strip_path: false
+        strip_path: true
         methods: [GET, POST, OPTIONS]
         paths:
           - /api/platform/storage/default/buckets
@@ -205,11 +205,10 @@ services:
         config:
           add:
             headers:
-              - "Authorization:Bearer $SUPABASE_SERVICE_KEY"
-              - "apikey:$SUPABASE_SERVICE_KEY"
+              - "Authorization:Bearer ${SUPABASE_SERVICE_KEY}"
+              - "apikey:${SUPABASE_SERVICE_KEY}"
           replace:
             uri: "/storage/v1/bucket"
-      - name: cors
 
   ## Analytics routes
   - name: analytics-v1
