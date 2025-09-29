@@ -34,7 +34,7 @@ basicauth_credentials:
 ### API Routes
 ###
 services:
-  ## Open Auth routes
+  ## Open Auth routes (no key-auth)
   - name: auth-v1-open
     url: http://$AUTH_HOST:9999/verify
     routes:
@@ -44,6 +44,7 @@ services:
           - /auth/v1/verify
     plugins:
       - name: cors
+
   - name: auth-v1-open-callback
     url: http://$AUTH_HOST:9999/callback
     routes:
@@ -53,6 +54,7 @@ services:
           - /auth/v1/callback
     plugins:
       - name: cors
+
   - name: auth-v1-open-authorize
     url: http://$AUTH_HOST:9999/authorize
     routes:
@@ -63,7 +65,7 @@ services:
     plugins:
       - name: cors
 
-  ## Secure Auth routes
+  ## Secure Auth routes (GoTrue)
   - name: auth-v1
     _comment: 'GoTrue: /auth/v1/* -> http://auth:9999/*'
     url: http://$AUTH_HOST:9999/
@@ -84,7 +86,7 @@ services:
             - admin
             - anon
 
-  ## Secure REST routes
+  ## Secure REST routes (PostgREST)
   - name: rest-v1
     _comment: 'PostgREST: /rest/v1/* -> http://rest:3000/*'
     url: http://$REST_HOST:3000/
@@ -105,9 +107,9 @@ services:
             - admin
             - anon
 
-  ## Secure GraphQL routes
+  ## Secure GraphQL routes (via PostgREST RPC)
   - name: graphql-v1
-    _comment: 'PostgREST: /graphql/v1/* -> http://rest:3000/rpc/graphql'
+    _comment: 'PostgREST: /graphql/v1 -> http://rest:3000/rpc/graphql'
     url: http://$REST_HOST:3000/rpc/graphql
     routes:
       - name: graphql-v1-all
@@ -131,9 +133,9 @@ services:
             - admin
             - anon
 
-  ## Secure Realtime routes
+  ## Realtime routes
   - name: realtime-v1-ws
-    _comment: 'Realtime: /realtime/v1/* -> ws://realtime:4000/socket/*'
+    _comment: 'Realtime WS: /realtime/v1/* -> ws://realtime:4000/socket/*'
     url: http://$REALTIME_HOST:4000/socket
     protocol: ws
     routes:
@@ -152,8 +154,9 @@ services:
           allow:
             - admin
             - anon
+
   - name: realtime-v1-rest
-    _comment: 'Realtime: /realtime/v1/* -> ws://realtime:4000/socket/*'
+    _comment: 'Realtime REST: /realtime/v1/api -> http://realtime:4000/api'
     url: http://$REALTIME_HOST:4000/api
     protocol: http
     routes:
@@ -173,32 +176,28 @@ services:
             - admin
             - anon
 
-  ## Storage routes: wire Storage API and Studio "platform" path
+  ## Storage API passthrough
+  # Proxies any /storage/v1/* call to Storage upstream.
+  # IMPORTANT: point STORAGE_API_HOST at your Storage service private host (e.g. storage-api.railway.internal)
   - name: storage-v1
-    _comment: 'Storage: /storage/v1/* -> http://$STORAGE_API_HOST:8000/*'
-    url: http://$STORAGE_API_HOST:5000/
+    _comment: 'Storage: /storage/v1/* -> http://$STORAGE_API_HOST:5000/storage/v1/*'
+    url: http://$STORAGE_API_HOST:5000/storage/v1
     routes:
-      # Public health (no auth plugins)
-      - name: storage-v1-health
-        strip_path: false
-        methods: [GET]
-        paths:
-          - /storage/v1/health
-      # Direct passthrough (you provide Authorization yourself)
       - name: storage-v1-all
-        strip_path: false
-        methods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
+        strip_path: true
         paths:
-          - /storage/v1
+          - /storage/v1/
     plugins:
       - name: cors
 
+  ## Studio helper for buckets list/create (injects service key)
+  # Maps Studio path to Storage /bucket and adds Authorization automatically.
   - name: platform-storage-buckets
-    _comment: 'Studio: /api/platform/storage/default/buckets -> /storage/v1/bucket (inject service key)'
-    url: http://$STORAGE_API_HOST:5000/
+    _comment: 'Studio: /api/platform/storage/default/buckets -> /storage/v1/bucket (with Bearer service key)'
+    url: http://$STORAGE_API_HOST:5000/storage/v1/bucket
     routes:
       - name: platform-storage-buckets-route
-        strip_path: false
+        strip_path: true
         methods: [GET, POST, OPTIONS]
         paths:
           - /api/platform/storage/default/buckets
@@ -209,8 +208,6 @@ services:
             headers:
               - "Authorization:Bearer $SUPABASE_SERVICE_KEY"
               - "apikey:$SUPABASE_SERVICE_KEY"
-          replace:
-            uri: "/storage/v1/bucket"
       - name: cors
 
   ## Analytics routes
@@ -223,7 +220,7 @@ services:
         paths:
           - /analytics/v1/
 
-  ## Secure Database routes
+  ## Secure Database meta routes (pg-meta)
   - name: meta
     _comment: 'pg-meta: /pg/* -> http://meta:8080/*'
     url: http://$META_HOST:8080/
@@ -242,7 +239,7 @@ services:
           allow:
             - admin
 
-  ## Protected Dashboard - catch all remaining routes
+  ## Protected Dashboard - catch all remaining routes (Studio)
   - name: dashboard
     _comment: 'Studio: /* -> http://studio:3000/*'
     url: http://$STUDIO_HOST:3000/
