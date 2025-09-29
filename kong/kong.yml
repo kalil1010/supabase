@@ -172,29 +172,46 @@ services:
           allow:
             - admin
             - anon
-  # ## Storage routes: the storage server manages its own auth
-  # - name: storage-v1
-  #   _comment: 'Storage: /storage/v1/* -> http://storage:5000/*'
-  #   url: http://storage:5000/
-  #   routes:
-  #     - name: storage-v1-all
-  #       strip_path: true
-  #       paths:
-  #         - /storage/v1/
-  #   plugins:
-  #     - name: cors
 
-  # ## Edge Functions routes
-  # - name: functions-v1
-  #   _comment: 'Edge Functions: /functions/v1/* -> http://functions:9000/*'
-  #   url: http://functions:9000/
-  #   routes:
-  #     - name: functions-v1-all
-  #       strip_path: true
-  #       paths:
-  #         - /functions/v1/
-  #   plugins:
-  #     - name: cors
+  ## Storage routes: wire Storage API and Studio "platform" path
+  - name: storage-v1
+    _comment: 'Storage: /storage/v1/* -> http://$STORAGE_API_HOST:8000/*'
+    url: http://$STORAGE_API_HOST:8000/
+    routes:
+      # Public health (no auth plugins)
+      - name: storage-v1-health
+        strip_path: false
+        methods: [GET]
+        paths:
+          - /storage/v1/health
+      # Direct passthrough (you provide Authorization yourself)
+      - name: storage-v1-all
+        strip_path: false
+        methods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
+        paths:
+          - /storage/v1
+    plugins:
+      - name: cors
+
+  - name: platform-storage-buckets
+    _comment: 'Studio: /api/platform/storage/default/buckets -> /storage/v1/bucket (inject service key)'
+    url: http://$STORAGE_API_HOST:8000/
+    routes:
+      - name: platform-storage-buckets-route
+        strip_path: false
+        methods: [GET, POST, OPTIONS]
+        paths:
+          - /api/platform/storage/default/buckets
+    plugins:
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "Authorization:Bearer $SUPABASE_SERVICE_KEY"
+              - "apikey:$SUPABASE_SERVICE_KEY"
+          replace:
+            uri: "/storage/v1/bucket"
+      - name: cors
 
   ## Analytics routes
   - name: analytics-v1
