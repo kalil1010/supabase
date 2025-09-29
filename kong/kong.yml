@@ -36,7 +36,7 @@ basicauth_credentials:
 services:
   ## Open Auth routes (no key-auth)
   - name: auth-v1-open
-    url: http://$AUTH_HOST:9999/verify
+    url: http://${AUTH_HOST}:9999/verify
     routes:
       - name: auth-v1-open
         strip_path: true
@@ -46,7 +46,7 @@ services:
       - name: cors
 
   - name: auth-v1-open-callback
-    url: http://$AUTH_HOST:9999/callback
+    url: http://${AUTH_HOST}:9999/callback
     routes:
       - name: auth-v1-open-callback
         strip_path: true
@@ -56,7 +56,7 @@ services:
       - name: cors
 
   - name: auth-v1-open-authorize
-    url: http://$AUTH_HOST:9999/authorize
+    url: http://${AUTH_HOST}:9999/authorize
     routes:
       - name: auth-v1-open-authorize
         strip_path: true
@@ -67,8 +67,7 @@ services:
 
   ## Secure Auth routes (GoTrue)
   - name: auth-v1
-    _comment: 'GoTrue: /auth/v1/* -> http://auth:9999/*'
-    url: http://$AUTH_HOST:9999/
+    url: http://${AUTH_HOST}:9999/
     routes:
       - name: auth-v1-all
         strip_path: true
@@ -88,8 +87,7 @@ services:
 
   ## Secure REST routes (PostgREST)
   - name: rest-v1
-    _comment: 'PostgREST: /rest/v1/* -> http://rest:3000/*'
-    url: http://$REST_HOST:3000/
+    url: http://${REST_HOST}:3000/
     routes:
       - name: rest-v1-all
         strip_path: true
@@ -109,8 +107,7 @@ services:
 
   ## Secure GraphQL routes
   - name: graphql-v1
-    _comment: 'PostgREST: /graphql/v1 -> http://rest:3000/rpc/graphql'
-    url: http://$REST_HOST:3000/rpc/graphql
+    url: http://${REST_HOST}:3000/rpc/graphql
     routes:
       - name: graphql-v1-all
         strip_path: true
@@ -135,8 +132,7 @@ services:
 
   ## Realtime routes
   - name: realtime-v1-ws
-    _comment: 'Realtime WS: /realtime/v1/* -> ws://realtime:4000/socket/*'
-    url: http://$REALTIME_HOST:4000/socket
+    url: http://${REALTIME_HOST}:4000/socket
     protocol: ws
     routes:
       - name: realtime-v1-ws
@@ -156,8 +152,7 @@ services:
             - anon
 
   - name: realtime-v1-rest
-    _comment: 'Realtime REST: /realtime/v1/api -> http://realtime:4000/api'
-    url: http://$REALTIME_HOST:4000/api
+    url: http://${REALTIME_HOST}:4000/api
     protocol: http
     routes:
       - name: realtime-v1-rest
@@ -212,8 +207,7 @@ services:
 
   ## Analytics routes
   - name: analytics-v1
-    _comment: 'Analytics: /analytics/v1/* -> http://analytics:4000/*'
-    url: http://$ANALYTICS_HOST:4000/
+    url: http://${ANALYTICS_HOST}:4000/
     routes:
       - name: analytics-v1-all
         strip_path: true
@@ -222,8 +216,7 @@ services:
 
   ## Database meta routes
   - name: meta
-    _comment: 'pg-meta: /pg/* -> http://meta:8080/*'
-    url: http://$META_HOST:8080/
+    url: http://${META_HOST}:8080/
     routes:
       - name: meta-all
         strip_path: true
@@ -241,8 +234,7 @@ services:
 
   ## Studio (dashboard catch-all)
   - name: dashboard
-    _comment: 'Studio: /* -> http://studio:3000/*'
-    url: http://$STUDIO_HOST:3000/
+    url: http://${STUDIO_HOST}:3000/
     routes:
       - name: dashboard-all
         strip_path: true
