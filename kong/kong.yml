@@ -107,7 +107,7 @@ services:
             - admin
             - anon
 
-  ## Secure GraphQL routes (via PostgREST RPC)
+  ## Secure GraphQL routes
   - name: graphql-v1
     _comment: 'PostgREST: /graphql/v1 -> http://rest:3000/rpc/graphql'
     url: http://$REST_HOST:3000/rpc/graphql
@@ -177,11 +177,9 @@ services:
             - anon
 
   ## Storage API passthrough
-  # Proxies any /storage/v1/* call to Storage upstream.
-  # IMPORTANT: point STORAGE_API_HOST at your Storage service private host (e.g. storage-api.railway.internal)
   - name: storage-v1
-    _comment: 'Storage: /storage/v1/* -> http://$STORAGE_API_HOST:5000/storage/v1/*'
-    url: http://$STORAGE_API_HOST:5000/storage/v1
+    _comment: 'Storage: /storage/v1/* -> http://$STORAGE_API_HOST:5000/*'
+    url: http://$STORAGE_API_HOST:5000
     routes:
       - name: storage-v1-all
         strip_path: true
@@ -190,14 +188,13 @@ services:
     plugins:
       - name: cors
 
-  ## Studio helper for buckets list/create (injects service key)
-  # Maps Studio path to Storage /bucket and adds Authorization automatically.
+  ## Studio helper (injects service key for buckets)
   - name: platform-storage-buckets
-    _comment: 'Studio: /api/platform/storage/default/buckets -> /storage/v1/bucket (with Bearer service key)'
-    url: http://$STORAGE_API_HOST:5000/storage/v1/bucket
+    _comment: 'Studio: /api/platform/storage/default/buckets -> /bucket'
+    url: http://$STORAGE_API_HOST:5000
     routes:
       - name: platform-storage-buckets-route
-        strip_path: true
+        strip_path: false
         methods: [GET, POST, OPTIONS]
         paths:
           - /api/platform/storage/default/buckets
@@ -208,6 +205,8 @@ services:
             headers:
               - "Authorization:Bearer $SUPABASE_SERVICE_KEY"
               - "apikey:$SUPABASE_SERVICE_KEY"
+          replace:
+            uri: "/storage/v1/bucket"
       - name: cors
 
   ## Analytics routes
@@ -220,7 +219,7 @@ services:
         paths:
           - /analytics/v1/
 
-  ## Secure Database meta routes (pg-meta)
+  ## Database meta routes
   - name: meta
     _comment: 'pg-meta: /pg/* -> http://meta:8080/*'
     url: http://$META_HOST:8080/
@@ -239,7 +238,7 @@ services:
           allow:
             - admin
 
-  ## Protected Dashboard - catch all remaining routes (Studio)
+  ## Studio (dashboard catch-all)
   - name: dashboard
     _comment: 'Studio: /* -> http://studio:3000/*'
     url: http://$STUDIO_HOST:3000/
