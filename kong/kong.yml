@@ -34,14 +34,13 @@ basicauth_credentials:
 ### API Routes
 ###
 services:
-  ## Open Auth routes (no key-auth)
+  ## Open Auth routes
   - name: auth-v1-open
     url: http://${AUTH_HOST}:9999/verify
     routes:
       - name: auth-v1-open
         strip_path: true
-        paths:
-          - /auth/v1/verify
+        paths: [ /auth/v1/verify ]
     plugins:
       - name: cors
 
@@ -50,8 +49,7 @@ services:
     routes:
       - name: auth-v1-open-callback
         strip_path: true
-        paths:
-          - /auth/v1/callback
+        paths: [ /auth/v1/callback ]
     plugins:
       - name: cors
 
@@ -60,19 +58,17 @@ services:
     routes:
       - name: auth-v1-open-authorize
         strip_path: true
-        paths:
-          - /auth/v1/authorize
+        paths: [ /auth/v1/authorize ]
     plugins:
       - name: cors
 
-  ## Secure Auth routes (GoTrue)
+  ## Secure Auth (GoTrue)
   - name: auth-v1
     url: http://${AUTH_HOST}:9999/
     routes:
       - name: auth-v1-all
         strip_path: true
-        paths:
-          - /auth/v1/
+        paths: [ /auth/v1/ ]
     plugins:
       - name: cors
       - name: key-auth
@@ -81,18 +77,15 @@ services:
       - name: acl
         config:
           hide_groups_header: true
-          allow:
-            - admin
-            - anon
+          allow: [ admin, anon ]
 
-  ## Secure REST routes (PostgREST)
+  ## Secure REST (PostgREST)
   - name: rest-v1
     url: http://${REST_HOST}:3000/
     routes:
       - name: rest-v1-all
         strip_path: true
-        paths:
-          - /rest/v1/
+        paths: [ /rest/v1/ ]
     plugins:
       - name: cors
       - name: key-auth
@@ -101,18 +94,15 @@ services:
       - name: acl
         config:
           hide_groups_header: true
-          allow:
-            - admin
-            - anon
+          allow: [ admin, anon ]
 
-  ## Secure GraphQL routes
+  ## GraphQL
   - name: graphql-v1
     url: http://${REST_HOST}:3000/rpc/graphql
     routes:
       - name: graphql-v1-all
         strip_path: true
-        paths:
-          - /graphql/v1
+        paths: [ /graphql/v1 ]
     plugins:
       - name: cors
       - name: key-auth
@@ -126,19 +116,16 @@ services:
       - name: acl
         config:
           hide_groups_header: true
-          allow:
-            - admin
-            - anon
+          allow: [ admin, anon ]
 
-  ## Realtime routes
+  ## Realtime (WebSocket)
   - name: realtime-v1-ws
     url: http://${REALTIME_HOST}:4000/socket
     protocol: ws
     routes:
       - name: realtime-v1-ws
         strip_path: true
-        paths:
-          - /realtime/v1/
+        paths: [ /realtime/v1/ ]
     plugins:
       - name: cors
       - name: key-auth
@@ -147,18 +134,16 @@ services:
       - name: acl
         config:
           hide_groups_header: true
-          allow:
-            - admin
-            - anon
+          allow: [ admin, anon ]
 
+  ## Realtime (HTTP)
   - name: realtime-v1-rest
     url: http://${REALTIME_HOST}:4000/api
     protocol: http
     routes:
       - name: realtime-v1-rest
         strip_path: true
-        paths:
-          - /realtime/v1/api
+        paths: [ /realtime/v1/api ]
     plugins:
       - name: cors
       - name: key-auth
@@ -167,9 +152,7 @@ services:
       - name: acl
         config:
           hide_groups_header: true
-          allow:
-            - admin
-            - anon
+          allow: [ admin, anon ]
 
   ## Storage API passthrough
   - name: storage-v1
@@ -179,12 +162,11 @@ services:
     routes:
       - name: storage-v1-all
         strip_path: true
-        paths:
-          - /storage/v1/
+        paths: [ /storage/v1/ ]
     plugins:
       - name: cors
 
-  ## Studio helper (injects service key for buckets)
+  ## Studio helper: buckets
   - name: platform-storage-buckets
     host: ${STORAGE_API_HOST}
     port: ${MINIO_PRIVATE_PORT}
@@ -192,9 +174,8 @@ services:
     routes:
       - name: platform-storage-buckets-route
         strip_path: true
-        methods: [GET, POST, OPTIONS]
-        paths:
-          - /api/platform/storage/default/buckets
+        methods: [ GET, POST, OPTIONS ]
+        paths: [ /api/platform/storage/default/buckets ]
     plugins:
       - name: request-transformer
         config:
@@ -205,23 +186,21 @@ services:
           replace:
             uri: "/storage/v1/buckets"
 
-  ## Analytics routes
+  ## Analytics
   - name: analytics-v1
     url: http://${ANALYTICS_HOST}:4000/
     routes:
       - name: analytics-v1-all
         strip_path: true
-        paths:
-          - /analytics/v1/
+        paths: [ /analytics/v1/ ]
 
-  ## Database meta routes
+  ## Meta (pg-meta)
   - name: meta
     url: http://${META_HOST}:8080/
     routes:
       - name: meta-all
         strip_path: true
-        paths:
-          - /pg/
+        paths: [ /pg/ ]
     plugins:
       - name: key-auth
         config:
@@ -229,17 +208,15 @@ services:
       - name: acl
         config:
           hide_groups_header: true
-          allow:
-            - admin
+          allow: [ admin ]
 
-  ## Studio (dashboard catch-all)
+  ## Studio catch-all
   - name: dashboard
     url: http://${STUDIO_HOST}:3000/
     routes:
       - name: dashboard-all
         strip_path: true
-        paths:
-          - /
+        paths: [ / ]
     plugins:
       - name: cors
       - name: basic-auth
