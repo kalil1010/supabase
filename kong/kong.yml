@@ -176,7 +176,7 @@ services:
   ## Storage routes: wire Storage API and Studio "platform" path
   - name: storage-v1
     _comment: 'Storage: /storage/v1/* -> http://$STORAGE_API_HOST:8000/*'
-    url: http://$STORAGE_API_HOST:8000/
+    url: http://$STORAGE_API_HOST:5000/
     routes:
       # Public health (no auth plugins)
       - name: storage-v1-health
@@ -195,7 +195,7 @@ services:
 
   - name: platform-storage-buckets
     _comment: 'Studio: /api/platform/storage/default/buckets -> /storage/v1/bucket (inject service key)'
-    url: http://$STORAGE_API_HOST:8000/
+    url: http://$STORAGE_API_HOST:5000/
     routes:
       - name: platform-storage-buckets-route
         strip_path: false
