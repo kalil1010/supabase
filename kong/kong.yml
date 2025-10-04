@@ -1,6 +1,5 @@
 _format_version: '2.1'
 _transform: true
-
 ###
 ### Consumers / Users
 ###
@@ -12,7 +11,6 @@ consumers:
   - username: service_role
     keyauth_credentials:
       - key: ${SUPABASE_SERVICE_KEY}
-
 ###
 ### Access Control List
 ###
@@ -21,7 +19,6 @@ acls:
     group: anon
   - consumer: service_role
     group: admin
-
 ###
 ### Dashboard credentials
 ###
@@ -29,7 +26,6 @@ basicauth_credentials:
   - consumer: DASHBOARD
     username: ${DASHBOARD_USERNAME}
     password: ${DASHBOARD_PASSWORD}
-
 ###
 ### API Routes
 ###
@@ -43,7 +39,6 @@ services:
         paths: [ /auth/v1/verify ]
     plugins:
       - name: cors
-
   - name: auth-v1-open-callback
     url: http://${AUTH_HOST}:9999/callback
     routes:
@@ -52,7 +47,6 @@ services:
         paths: [ /auth/v1/callback ]
     plugins:
       - name: cors
-
   - name: auth-v1-open-authorize
     url: http://${AUTH_HOST}:9999/authorize
     routes:
@@ -61,7 +55,6 @@ services:
         paths: [ /auth/v1/authorize ]
     plugins:
       - name: cors
-
   ## Secure Auth (GoTrue)
   - name: auth-v1
     url: http://${AUTH_HOST}:9999/
@@ -78,7 +71,6 @@ services:
         config:
           hide_groups_header: true
           allow: [ admin, anon ]
-
   ## Secure REST (PostgREST)
   - name: rest-v1
     url: http://${REST_HOST}:3000/
@@ -95,7 +87,6 @@ services:
         config:
           hide_groups_header: true
           allow: [ admin, anon ]
-
   ## GraphQL
   - name: graphql-v1
     url: http://${REST_HOST}:3000/rpc/graphql
@@ -117,7 +108,6 @@ services:
         config:
           hide_groups_header: true
           allow: [ admin, anon ]
-
   ## Realtime (WebSocket)
   - name: realtime-v1-ws
     url: http://${REALTIME_HOST}:4000/socket
@@ -135,7 +125,6 @@ services:
         config:
           hide_groups_header: true
           allow: [ admin, anon ]
-
   ## Realtime (HTTP)
   - name: realtime-v1-rest
     url: http://${REALTIME_HOST}:4000/api
@@ -153,7 +142,6 @@ services:
         config:
           hide_groups_header: true
           allow: [ admin, anon ]
-
   ## Storage API passthrough
   - name: storage-v1
     host: ${STORAGE_API_HOST}
@@ -165,7 +153,6 @@ services:
         paths: [ /storage/v1/ ]
     plugins:
       - name: cors
-
   ## Studio helper: buckets
   - name: platform-storage-buckets
     url: http://${STORAGE_API_HOST}:${MINIO_PRIVATE_PORT}/storage/v1/buckets
@@ -174,14 +161,6 @@ services:
         strip_path: true
         methods: [ GET, POST, OPTIONS ]
         paths: [ /api/platform/storage/default/buckets ]
-    plugins:
-      - name: request-transformer
-        config:
-          add:
-            headers:
-              - "Authorization:Bearer ${SUPABASE_SERVICE_KEY}"
-              - "apikey:${SUPABASE_SERVICE_KEY}"
-
   ## Analytics
   - name: analytics-v1
     url: http://${ANALYTICS_HOST}:4000/
@@ -189,7 +168,6 @@ services:
       - name: analytics-v1-all
         strip_path: true
         paths: [ /analytics/v1/ ]
-
   ## Meta (pg-meta)
   - name: meta
     url: http://${META_HOST}:8080/
@@ -205,7 +183,6 @@ services:
         config:
           hide_groups_header: true
           allow: [ admin ]
-
   ## Studio catch-all
   - name: dashboard
     url: http://${STUDIO_HOST}:3000/
