@@ -168,9 +168,7 @@ services:
 
   ## Studio helper: buckets
   - name: platform-storage-buckets
-    host: ${STORAGE_API_HOST}
-    port: ${MINIO_PRIVATE_PORT}
-    protocol: http
+    url: http://${STORAGE_API_HOST}:${MINIO_PRIVATE_PORT}/storage/v1/buckets
     routes:
       - name: platform-storage-buckets-route
         strip_path: true
@@ -183,8 +181,6 @@ services:
             headers:
               - "Authorization:Bearer ${SUPABASE_SERVICE_KEY}"
               - "apikey:${SUPABASE_SERVICE_KEY}"
-          replace:
-            uri: "/storage/v1/buckets"
 
   ## Analytics
   - name: analytics-v1
